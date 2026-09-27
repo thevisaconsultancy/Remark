@@ -12,3 +12,14 @@ export const SOCIALS = [
 export const EMAIL = "hello@remarkstudio.co";
 export const PHONE_PRIMARY = { display: "+92 326 8450001", href: "tel:+923268450001" };
 export const PHONE_SECONDARY = { display: "+92 326 8450002", href: "tel:+923268450002" };
+
+export const ADDRESS = {
+  lines: ["Office #104, Mezzanine Floor", "Embassy Gardens, Sector C1", "Bahria Enclave, Islamabad"],
+  full: "Office #104, Mezzanine Floor, Embassy Gardens, Sector C1, Bahria Enclave, Islamabad",
+} as const;
+
+export const MAPS_URL = "https://www.google.com/maps/search/?api=1&query=" + encodeURIComponent(ADDRESS.full);
+
+// TODO(remark): add the verified WhatsApp Business number, e.g.
+// { display: "+92 3xx xxxxxxx", href: "https://wa.me/923xxxxxxxxx" }. Pages render WhatsApp only when this is set.
+export const WHATSAPP: { display: string; href: string } | null = null;

@@ -1,0 +1,35 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8" />
+<title>Remark art stage</title>
+<style>
+  @font-face { font-family: "Cranio"; src: url("/src/app/fonts/Cranio/CranioRegular-WpD9n.otf"); }
+  @font-face { font-family: "Betha"; src: url("/public/fonts/Betha/Betha-KVj87.otf"); }
+  html, body { margin: 0; background: #111; }
+  canvas { display: block; }
+</style>
+<script type="importmap">
+{ "imports": {
+  "three": "/node_modules/three/build/three.module.js",
+  "three/addons/": "/node_modules/three/examples/jsm/"
+} }
+</script>
+</head>
+<body>
+<script type="module">
+  const q = new URLSearchParams(location.hash.slice(1));
+  const piece = q.get("piece");
+  const opts = { w: +q.get("w"), h: +q.get("h"), s: +(q.get("s") || 2), variant: q.get("variant") || "" };
+  try {
+    await document.fonts.load('100px "Cranio"');
+    await document.fonts.load('100px "Betha"');
+    const mod = await import(`./pieces/${piece}.js`);
+    const canvas = await mod.default(opts);
+    window.__result = canvas.toDataURL("image/png");
+  } catch (e) {
+    window.__error = String(e && e.stack || e);
+  }
+</script>
+</body>
+</html>

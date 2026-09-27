@@ -1,0 +1,324 @@
+/* Work page motion.
+   Rules of the house: every entrance plays once; only transform, opacity and
+   clip-path move; nothing loops. Hidden starting states exist only inside
+   `prefers-reduced-motion: no-preference` and only once JS has marked an element
+   `data-seen="false"` (see Seen.tsx), so without motion or without JS every
+   element is simply in its final state. */
+
+/* ------------------------------------------------------------------ */
+/* Resting styles (apply with or without motion)                       */
+/* ------------------------------------------------------------------ */
+
+/* A hairline that can draw itself: the li's top edge (and bottom edge for the last). */
+.rule {
+  position: relative;
+}
+.rule::before,
+.ruleEnd::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: currentColor;
+  opacity: 0.16;
+  transform-origin: left center;
+  pointer-events: none;
+}
+.rule::before {
+  top: 0;
+}
+.ruleEnd::after {
+  bottom: 0;
+}
+
+/* Module index: a red rule draws under the row on hover or focus. */
+.indexRow {
+  position: relative;
+}
+.indexRow::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -1px;
+  height: 2px;
+  background: var(--color-accent);
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 700ms cubic-bezier(0.19, 1, 0.22, 1);
+}
+.indexRow:hover::after,
+.indexRow:focus-visible::after {
+  transform: scaleX(1);
+}
+.indexArrow {
+  transition: transform 500ms cubic-bezier(0.19, 1, 0.22, 1);
+}
+.indexRow:hover .indexArrow,
+.indexRow:focus-visible .indexArrow {
+  transform: translateY(3px);
+}
+
+/* Websites: a red field wipes in behind the row, left to right. */
+.site {
+  position: relative;
+  isolation: isolate;
+}
+.siteFill {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: var(--color-accent);
+  clip-path: inset(0 100% 0 0);
+  transition: clip-path 650ms cubic-bezier(0.19, 1, 0.22, 1);
+}
+.site:hover .siteFill,
+.site:focus-visible .siteFill {
+  clip-path: inset(0 0 0 0);
+}
+.siteArrow {
+  transform: rotate(-45deg);
+  transition: transform 500ms cubic-bezier(0.19, 1, 0.22, 1);
+}
+.site:hover .siteArrow,
+.site:focus-visible .siteArrow {
+  transform: rotate(0deg) translateX(4px);
+}
+
+/* Cursor-aware shots: the tilt itself is set inline by ShotTilt. */
+.tilt {
+  transform-style: preserve-3d;
+  transition: transform 700ms cubic-bezier(0.19, 1, 0.22, 1);
+}
+
+/* The case legend: hovering a facet lifts its numbered pin on the shot. */
+.legendNum {
+  transition: scale 400ms cubic-bezier(0.19, 1, 0.22, 1);
+}
+.caseLink li:hover .legendNum {
+  scale: 1.18;
+}
+.caseLink:has([data-facet="1"]:hover) [data-pin="1"],
+.caseLink:has([data-facet="2"]:hover) [data-pin="2"],
+.caseLink:has([data-facet="3"]:hover) [data-pin="3"],
+.caseLink:has([data-facet="4"]:hover) [data-pin="4"],
+.caseLink:has([data-facet="5"]:hover) [data-pin="5"],
+.caseLink:has([data-facet="6"]:hover) [data-pin="6"],
+.caseLink:has([data-facet="7"]:hover) [data-pin="7"] {
+  scale: 1.35;
+}
+
+/* Chapter chip: out of the way until the story starts, and again at the footer. */
+.rail {
+  transition: opacity 400ms cubic-bezier(0.19, 1, 0.22, 1), transform 500ms cubic-bezier(0.19, 1, 0.22, 1), visibility 0s;
+}
+.rail[data-on="false"] {
+  opacity: 0;
+  transform: translateY(14px);
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 300ms ease, transform 300ms ease, visibility 0s 300ms;
+}
+.progress {
+  display: none;
+}
+
+/* ------------------------------------------------------------------ */
+/* Motion                                                              */
+/* ------------------------------------------------------------------ */
+
+@media (prefers-reduced-motion: no-preference) {
+  /* The chip's chapter number ticks up whenever the chapter changes; the list rises open. */
+  .chipNum {
+    display: inline-block;
+    animation: tickUp 420ms cubic-bezier(0.19, 1, 0.22, 1) backwards;
+  }
+  .railDetails[open] .railList {
+    animation: fadeUpSm 360ms cubic-bezier(0.19, 1, 0.22, 1) backwards;
+  }
+
+  /* Opening: text settles in on load, the red mass pours in from the right. */
+  .load {
+    animation: fadeUp 900ms cubic-bezier(0.19, 1, 0.22, 1) backwards;
+    animation-delay: calc(250ms + var(--i, 0) * 90ms);
+  }
+  .pour {
+    animation: pour 1400ms cubic-bezier(0.19, 1, 0.22, 1) 350ms backwards;
+  }
+
+  /* Chapter heads: the number tag wipes open, the number ticks up into it, the label follows. */
+  [data-seen="false"] .tag {
+    clip-path: inset(0 100% 0 0);
+  }
+  [data-seen="false"] .num,
+  [data-seen="false"] .label {
+    opacity: 0;
+  }
+  [data-seen="true"] .tag {
+    animation: wipe 520ms cubic-bezier(0.19, 1, 0.22, 1) backwards;
+  }
+  [data-seen="true"] .num {
+    animation: tickUp 520ms cubic-bezier(0.19, 1, 0.22, 1) 160ms backwards;
+  }
+  [data-seen="true"] .label {
+    animation: slideIn 700ms cubic-bezier(0.19, 1, 0.22, 1) 260ms backwards;
+  }
+
+  /* Hairlines draw left to right, one after another. */
+  [data-seen="false"] .rule::before,
+  [data-seen="false"] .ruleEnd::after {
+    transform: scaleX(0);
+  }
+  [data-seen="true"] .rule::before,
+  [data-seen="true"] .ruleEnd::after {
+    animation: drawX 1100ms cubic-bezier(0.19, 1, 0.22, 1) backwards;
+    animation-delay: calc(var(--i, 0) * 70ms);
+  }
+  [data-seen="true"] .ruleEnd::after {
+    animation-delay: calc(var(--i, 0) * 70ms + 140ms);
+  }
+
+  /* Small items (chips, list rows) rising in sequence. */
+  [data-seen="false"] .item {
+    opacity: 0;
+  }
+  [data-seen="true"] .item {
+    animation: fadeUpSm 700ms cubic-bezier(0.19, 1, 0.22, 1) backwards;
+    animation-delay: calc(120ms + var(--i, 0) * 60ms);
+  }
+
+  /* 03: the line runs across, and each station lights as the line reaches it. */
+  [data-seen="false"] .runX,
+  [data-seen="false"] .runY,
+  [data-seen="false"] .dot,
+  [data-seen="false"] .station {
+    opacity: 0;
+  }
+  [data-seen="true"] .runX {
+    transform-origin: left center;
+    animation: drawX 1600ms linear 40ms backwards;
+  }
+  [data-seen="true"] .runY {
+    transform-origin: center top;
+    animation: drawY 1600ms linear 40ms backwards;
+  }
+  [data-seen="true"] .dot {
+    animation: lightUp 520ms cubic-bezier(0.2, 1, 0.3, 1) backwards;
+    animation-delay: calc(var(--i, 0) * 400ms + 60ms);
+  }
+  [data-seen="true"] .station {
+    animation: fadeUpSm 700ms cubic-bezier(0.19, 1, 0.22, 1) backwards;
+    animation-delay: calc(var(--i, 0) * 400ms + 160ms);
+  }
+  /* The last station answers once with a single ring. */
+  [data-seen="true"] .ring {
+    animation: ringOnce 1100ms cubic-bezier(0.2, 1, 0.3, 1) 1760ms both;
+  }
+  .ring {
+    opacity: 0;
+  }
+}
+
+/* Scroll-driven motion: only where the browser supports it; everywhere else, still. */
+@supports (animation-timeline: scroll()) {
+  /* Reading progress along the chip's foot: a transform tied to the page's scroll. */
+  .progress {
+    display: block;
+  }
+  .progress > span {
+    transform-origin: left center;
+    animation: drawX linear both;
+    animation-timeline: scroll(root);
+  }
+}
+
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    /* Shots settle up into place as they enter. */
+    .reveal {
+      animation: reveal linear both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 70%;
+    }
+
+    /* The opening shot starts tipped back and settles flat as the page scrolls. */
+    .settle {
+      animation: settle linear both;
+      animation-timeline: scroll(root);
+      animation-range: 0px 60vh;
+    }
+
+    /* The red fields behind shots drift a little slower than the page: quiet parallax. */
+    .drift {
+      animation: drift linear both;
+      animation-timeline: view();
+      animation-range: cover 0% cover 100%;
+    }
+
+    /* The brief's six jobs rise out of their own line as each one arrives. */
+    .word {
+      animation: word linear both;
+      animation-timeline: view();
+      animation-range: entry 15% entry 85%;
+    }
+  }
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(18px); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes fadeUpSm {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes slideIn {
+  from { opacity: 0; transform: translateX(-8px); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes tickUp {
+  from { opacity: 0; transform: translateY(90%); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes wipe {
+  from { clip-path: inset(0 100% 0 0); }
+  to { clip-path: inset(0 0 0 0); }
+}
+@keyframes pour {
+  from { clip-path: inset(0 0 0 100%); }
+  to { clip-path: inset(0 0 0 0); }
+}
+@keyframes drawX {
+  from { transform: scaleX(0); opacity: 1; }
+  to { transform: scaleX(1); opacity: 1; }
+}
+@keyframes drawY {
+  from { transform: scaleY(0); opacity: 1; }
+  to { transform: scaleY(1); opacity: 1; }
+}
+@keyframes lightUp {
+  0% { opacity: 0; transform: scale(0.4); }
+  60% { opacity: 1; transform: scale(1.12); }
+  100% { opacity: 1; transform: scale(1); }
+}
+@keyframes ringOnce {
+  0% { opacity: 0.7; transform: scale(1); }
+  100% { opacity: 0; transform: scale(2.4); }
+}
+@keyframes reveal {
+  from { opacity: 0; transform: translateY(56px) scale(0.975); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes settle {
+  from { transform: rotateX(14deg) scale(0.95); }
+  to { transform: rotateX(0deg) scale(1); }
+}
+@keyframes drift {
+  from { transform: translateY(7%); }
+  to { transform: translateY(-7%); }
+}
+@keyframes word {
+  from { opacity: 0; transform: translateY(45%); }
+  to { opacity: 1; transform: none; }
+}

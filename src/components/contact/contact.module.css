@@ -1,0 +1,552 @@
+/*
+  Contact: the counter, in daylight.
+  A duplicate order book: a paper top sheet, a red office copy, a perforation between them.
+  Motion runs only in response to the visitor, animates transform / opacity / clip-path
+  (plus the 140ms carbon blur the brief asks for), and resolves to final states under
+  prefers-reduced-motion.
+*/
+
+/* ---------- The office copy slab and its perforation ---------- */
+
+/* Below lg the office copy is a band; its bottom edge is a row of 6px holes every 14px. */
+.slab {
+  -webkit-mask-image: radial-gradient(circle at 7px calc(100% - 9px), transparent 3px, #000 3.5px);
+  mask-image: radial-gradient(circle at 7px calc(100% - 9px), transparent 3px, #000 3.5px);
+  -webkit-mask-size: 14px 100%;
+  mask-size: 14px 100%;
+  -webkit-mask-repeat: repeat-x;
+  mask-repeat: repeat-x;
+}
+
+/* On lg the slab is the left leaf; the perforation runs down its right edge. */
+@media (min-width: 1024px) {
+  .slab {
+    -webkit-mask-image: radial-gradient(circle at calc(100% - 9px) 7px, transparent 3px, #000 3.5px);
+    mask-image: radial-gradient(circle at calc(100% - 9px) 7px, transparent 3px, #000 3.5px);
+    -webkit-mask-size: 100% 14px;
+    mask-size: 100% 14px;
+    -webkit-mask-repeat: repeat-y;
+    mask-repeat: repeat-y;
+  }
+}
+
+/* ---------- Pen mark: the underline on "file" ---------- */
+
+/* Drawn once, left to right, like a clerk's pen. clip-path only. */
+.pen {
+  clip-path: inset(0 100% 0 0);
+  transition: clip-path 700ms var(--ease-out-expo, cubic-bezier(0.19, 1, 0.22, 1));
+}
+
+.pen[data-drawn] {
+  clip-path: inset(0 0 0 0);
+}
+
+/* ---------- Carbon transfer ---------- */
+
+/* Values are pressed through a faint displacement so they read as transferred, not typed. */
+.carbon {
+  filter: url(#carbon-transfer);
+}
+
+/* Each new character is pressed through: it lands a hair high and heavy, its ink blooms
+   (a soft text-shadow halo), then it tightens into the letter. A paste staggers by 18ms a
+   character. One short animation per new span; nothing loops. */
+.char {
+  display: inline-block;
+  white-space: pre;
+  animation: carbon-in 320ms var(--ease-out-quart, cubic-bezier(0.25, 1, 0.5, 1)) calc(var(--i, 0) * 18ms) both;
+}
+
+@keyframes carbon-in {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, -0.12em, 0) scale(1.12);
+    text-shadow: 0 0 0.4em oklch(0.965 0.006 75 / 0.9);
+  }
+  45% {
+    opacity: 1;
+    text-shadow: 0 0 0.14em oklch(0.965 0.006 75 / 0.55);
+  }
+  100% {
+    opacity: 1;
+    transform: none;
+    text-shadow: 0 0 0 oklch(0.965 0.006 75 / 0);
+  }
+}
+
+/* Ticking a service rewrites the For line: it settles in rather than snapping. */
+.needs {
+  display: inline-block;
+  animation: settle-in 260ms var(--ease-out-expo, cubic-bezier(0.19, 1, 0.22, 1)) both;
+}
+
+@keyframes settle-in {
+  from {
+    opacity: 0.35;
+    transform: translate3d(0, -2px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* The docket line under the visitor's pen draws its rule in fg, left to right. */
+.docketRow::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -1px;
+  height: 1px;
+  background: var(--color-fg, #f6f3ef);
+  transform: scaleX(0);
+  transform-origin: 0 50%;
+  transition: transform 420ms var(--ease-out-expo, cubic-bezier(0.19, 1, 0.22, 1));
+}
+
+.docketRow[data-on]::after {
+  transform: scaleX(1);
+}
+
+/* ---------- Form fields ---------- */
+
+.field {
+  outline: none;
+}
+
+/* On focus a 2px crimson rule draws over the ink line from the left: a pen along a ruler.
+   transform only, so nothing reflows. */
+.rule {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 2px;
+  background: var(--color-red-500, #b91319);
+  transform: scaleX(0);
+  transform-origin: 0 50%;
+  transition: transform 460ms var(--ease-out-expo, cubic-bezier(0.19, 1, 0.22, 1));
+  pointer-events: none;
+}
+
+.line:focus-within .rule {
+  transform: scaleX(1);
+}
+
+/* An error slides in under its field instead of popping. */
+.error {
+  animation: error-in 240ms var(--ease-out-expo, cubic-bezier(0.19, 1, 0.22, 1)) both;
+}
+
+@keyframes error-in {
+  from {
+    opacity: 0;
+    transform: translate3d(0, -4px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* A field the send refused is ruled in red until it is fixed, not only captioned. */
+.field[aria-invalid="true"] {
+  border-bottom-color: var(--color-red-600, #ac0000);
+}
+
+/* Keyboard focus also gets the global ring: 2px ink, 2px offset, never animated. */
+.sheet[data-kbd] .field:focus-visible {
+  outline: 2px solid var(--color-ink, #1a1210);
+  outline-offset: 2px;
+}
+
+.field:-webkit-autofill,
+.field:-webkit-autofill:focus {
+  -webkit-text-fill-color: var(--color-ink, #1a1210);
+  box-shadow: inset 0 0 0 1000px #e6dfd6;
+}
+
+.brief {
+  field-sizing: content;
+  max-width: 100%;
+  min-height: calc(4lh + 1rem);
+  resize: none;
+}
+
+/* ---------- Tick box: one pen stroke ---------- */
+
+/* Unticking lifts the ink quickly; ticking draws it with a pen's pace: a slow press,
+   a fast flick, a slow lift off the end. */
+.stroke {
+  /* The gap is longer than the path, so an untouched stroke leaves no round-cap dot. */
+  stroke-dasharray: 40 44;
+  stroke-dashoffset: 42;
+  transition: stroke-dashoffset 120ms ease-in;
+}
+
+.tick input:checked ~ .box .stroke {
+  stroke-dashoffset: 0;
+  transition: stroke-dashoffset 260ms cubic-bezier(0.55, 0.05, 0.25, 1);
+}
+
+.box {
+  transition:
+    border-color 150ms,
+    transform 160ms var(--ease-out-expo, cubic-bezier(0.19, 1, 0.22, 1));
+}
+
+.tick:active .box {
+  transform: scale(0.9);
+}
+
+.tick input:focus-visible ~ .box {
+  outline: 2px solid var(--color-ink, #1a1210);
+  outline-offset: 2px;
+}
+
+/* ---------- Tear off and send ---------- */
+
+.sheet {
+  position: relative;
+  transform-origin: 100% 0;
+}
+
+@media (min-width: 1024px) {
+  /* Near the send button the sheet eases a few whole pixels off the perforation (see
+     --pull in ContactCounter); whole pixels keep the type crisp. */
+  .sheet {
+    transform: translate3d(round(calc(var(--pull, 0) * 4px), 1px), 0, 0);
+    transition: transform 520ms var(--ease-out-expo, cubic-bezier(0.19, 1, 0.22, 1));
+  }
+
+  /* The crease: a soft shadow gathering along the tear line as the pull grows. */
+  .sheet::before {
+    content: "";
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: 22px;
+    background: linear-gradient(to right, oklch(0.19 0.014 30 / 0.16), oklch(0.19 0.014 30 / 0));
+    opacity: var(--pull, 0);
+    transition: opacity 300ms linear;
+    pointer-events: none;
+  }
+
+  /* The tear: a short tug down against the perforation, then the sheet rips free to the
+     right along its ragged edge. */
+  .sheet[data-torn] {
+    clip-path: var(--tear);
+    transform: translate3d(112%, 5%, 0) rotate(5deg);
+    opacity: 0;
+    visibility: hidden;
+    animation: tear 780ms var(--ease-in-out-expo, cubic-bezier(0.87, 0, 0.13, 1)) backwards;
+  }
+
+  /* Once it has gone the final state is static, so a layout change never replays the tear. */
+  .sheet[data-gone] {
+    animation: none;
+  }
+
+  .sheet[data-torn]::before {
+    opacity: 0;
+  }
+}
+
+@keyframes tear {
+  0% {
+    transform: translate3d(round(calc(var(--pull, 0) * 4px), 1px), 0, 0);
+    opacity: 1;
+    visibility: visible;
+  }
+  16% {
+    transform: translate3d(-5px, 3px, 0) rotate(-0.5deg);
+    opacity: 1;
+  }
+  70% {
+    opacity: 1;
+  }
+  100% {
+    transform: translate3d(112%, 5%, 0) rotate(5deg);
+    opacity: 0;
+    visibility: hidden;
+  }
+}
+
+/* The send button gives a little under the thumb. */
+.send {
+  transition: transform 200ms var(--ease-out-expo, cubic-bezier(0.19, 1, 0.22, 1));
+}
+
+.send:active {
+  transform: scale(0.99);
+}
+
+/* Below lg there is no tear: the sheet crossfades out. */
+@media (max-width: 1023.98px) {
+  .sheet {
+    transition: opacity 260ms var(--ease-out-expo, cubic-bezier(0.19, 1, 0.22, 1));
+  }
+  .sheet[data-torn] {
+    opacity: 0;
+  }
+}
+
+/* The office copy grows from its leaf to the full width. Never width: transform only. */
+.grow {
+  transform: scaleX(0.4);
+  transform-origin: 0 50%;
+  transition: transform 600ms var(--ease-out-expo, cubic-bezier(0.19, 1, 0.22, 1));
+}
+
+.grow[data-on] {
+  transform: scaleX(1);
+  transition-delay: 120ms;
+}
+
+/* The success panel settles where the sheet was. */
+.success {
+  animation: settle 520ms var(--ease-out-expo, cubic-bezier(0.19, 1, 0.22, 1)) 420ms both;
+}
+
+@media (max-width: 1023.98px) {
+  .success {
+    animation-duration: 360ms;
+    animation-delay: 180ms;
+  }
+}
+
+@keyframes settle {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 14px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* ---------- RECEIVED stamp ---------- */
+
+.stamp {
+  transform: rotate(-6deg);
+  /* Uneven ink: a fixed noise field thins the stamp in patches. */
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='160'%3E%3Cfilter id='n' x='0' y='0'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.42' numOctaves='3' seed='11'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 -2.6 0 0 0 2.2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='160'%3E%3Cfilter id='n' x='0' y='0'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.42' numOctaves='3' seed='11'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 -2.6 0 0 0 2.2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  -webkit-mask-size: 300px 160px;
+  mask-size: 300px 160px;
+  animation: stamp-fade 160ms var(--ease-out-expo, cubic-bezier(0.19, 1, 0.22, 1)) 300ms both;
+}
+
+@media (min-width: 1024px) {
+  .stamp {
+    animation-name: stamp-land;
+    animation-delay: 560ms;
+  }
+}
+
+/* Lifted, pressed a touch past flat, then released: a rubber stamp's thud. */
+@keyframes stamp-land {
+  0% {
+    opacity: 0;
+    transform: rotate(-9deg) scale(1.35);
+  }
+  55% {
+    opacity: 1;
+    transform: rotate(-5.5deg) scale(0.96);
+  }
+  100% {
+    opacity: 1;
+    transform: rotate(-6deg) scale(1);
+  }
+}
+
+/* What happens next: the three steps settle in one after another. */
+.step {
+  animation: settle 480ms var(--ease-out-expo, cubic-bezier(0.19, 1, 0.22, 1)) calc(560ms + var(--i, 0) * 90ms) both;
+}
+
+@keyframes stamp-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* ---------- Copy stub: a torn receipt with a perforated top ---------- */
+
+.stub {
+  -webkit-mask-image: radial-gradient(circle at 7px 0, transparent 3.5px, #000 4px);
+  mask-image: radial-gradient(circle at 7px 0, transparent 3.5px, #000 4px);
+  -webkit-mask-size: 14px 100%;
+  mask-size: 14px 100%;
+  -webkit-mask-repeat: repeat-x;
+  mask-repeat: repeat-x;
+}
+
+/* ---------- Direct line: the number wipe ---------- */
+
+/* The number is the section: it is sized to fill the line, leaving room for its copy button. */
+.numberRow {
+  container-type: inline-size;
+}
+
+.number {
+  font-size: min(12.5rem, calc((100cqi - 4rem) / 7.1));
+}
+
+/* The digits roll in like an odometer the first time the number comes into view. Each
+   slot clips its own column (clip-path, so the baseline is untouched); the column holds
+   the final glyph in flow and two lead-in digits (pseudo content) stacked above it.
+   transform only, once. */
+.slot {
+  display: inline-block;
+  clip-path: inset(0 -0.2em);
+}
+
+.reel {
+  display: inline-block;
+  position: relative;
+}
+
+.reel[data-a]::before,
+.reel[data-b]::after {
+  position: absolute;
+  left: 50%;
+  translate: -50% 0;
+}
+
+.reel[data-a]::before {
+  content: attr(data-a);
+  top: -100%;
+}
+
+.reel[data-b]::after {
+  content: attr(data-b);
+  top: -200%;
+}
+
+.roll[data-roll="armed"] .reel {
+  transform: translate3d(0, 200%, 0);
+}
+
+.roll[data-roll="in"] .reel {
+  transform: none;
+  transition: transform 1100ms var(--ease-out-expo, cubic-bezier(0.19, 1, 0.22, 1)) calc(var(--i, 0) * 45ms);
+}
+
+/* ---------- Copy to clipboard ---------- */
+
+/* The copy icon tips away as a check is drawn in its place; "Copied" rises and fades. */
+.copyIcon,
+.checkIcon {
+  position: absolute;
+  transition:
+    opacity 220ms var(--ease-out-expo, cubic-bezier(0.19, 1, 0.22, 1)),
+    transform 320ms var(--ease-out-expo, cubic-bezier(0.19, 1, 0.22, 1));
+}
+
+.checkIcon {
+  opacity: 0;
+  transform: scale(0.6);
+}
+
+.checkIcon polyline {
+  stroke-dasharray: 24;
+  stroke-dashoffset: 24;
+  transition: stroke-dashoffset 300ms var(--ease-out-quart, cubic-bezier(0.25, 1, 0.5, 1)) 60ms;
+}
+
+[data-copied] .copyIcon {
+  opacity: 0;
+  transform: scale(0.6) rotate(-25deg);
+}
+
+[data-copied] .checkIcon {
+  opacity: 1;
+  transform: none;
+}
+
+[data-copied] .checkIcon polyline {
+  stroke-dashoffset: 0;
+}
+
+.copiedTag {
+  opacity: 0;
+  transform: translate3d(-50%, 5px, 0);
+  transition:
+    opacity 260ms var(--ease-out-expo, cubic-bezier(0.19, 1, 0.22, 1)),
+    transform 420ms var(--ease-out-expo, cubic-bezier(0.19, 1, 0.22, 1));
+}
+
+[data-copied] .copiedTag {
+  opacity: 1;
+  transform: translate3d(-50%, 0, 0);
+}
+
+/* Below 360px the copy button is hidden and a tap on the number calls. */
+@media (max-width: 359.98px) {
+  .number {
+    font-size: calc(100cqi / 7.15);
+  }
+}
+
+/* ---------- Reduced motion: every piece in its final state ---------- */
+
+@media (prefers-reduced-motion: reduce) {
+  .pen {
+    clip-path: inset(0 0 0 0);
+    transition: none;
+  }
+  .char,
+  .needs,
+  .error,
+  .step,
+  .success,
+  .stamp {
+    animation: none;
+  }
+  .sheet,
+  .sheet[data-torn] {
+    animation: none;
+    transform: none;
+  }
+  .sheet[data-torn] {
+    opacity: 0;
+    visibility: hidden;
+  }
+  .sheet::before {
+    display: none;
+  }
+  .rule,
+  .docketRow::after,
+  .box,
+  .send,
+  .copyIcon,
+  .checkIcon,
+  .checkIcon polyline,
+  .copiedTag,
+  .roll .reel {
+    transition: none !important;
+  }
+  .roll[data-roll] .reel {
+    transform: none;
+  }
+  .tick:active .box,
+  .send:active {
+    transform: none;
+  }
+  .stamp {
+    opacity: 1;
+    transform: rotate(-6deg);
+  }
+  .grow,
+  .grow[data-on],
+  .stroke,
+  .tick input:checked ~ .box .stroke {
+    transition: none;
+  }
+}

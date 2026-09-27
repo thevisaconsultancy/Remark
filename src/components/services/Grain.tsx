@@ -1,0 +1,13 @@
+// Local copy of SvgPatterns' GrainOverlay whose opacity is actually honoured
+// (the shared one pins opacity to 0.015 through an inline style).
+const NOISE = `url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")`;
+
+export function Grain({ opacity, className = "" }: { opacity: number; className?: string }) {
+  return (
+    <div
+      aria-hidden="true"
+      className={`pointer-events-none absolute inset-0 mix-blend-screen ${className}`}
+      style={{ opacity, backgroundImage: NOISE, backgroundSize: "512px 512px" }}
+    />
+  );
+}

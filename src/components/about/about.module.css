@@ -1,0 +1,437 @@
+/*
+ * About: the hallmark.
+ *
+ * Motion rules for this page:
+ *  - transform, opacity and clip-path only; every piece runs once, on first view;
+ *  - the resting state is the final state. Anything that starts hidden is hidden only
+ *    under `(scripting: enabled) and (prefers-reduced-motion: no-preference)`, so with
+ *    no script or with reduced motion the page simply renders finished.
+ */
+
+.page {
+  hanging-punctuation: first allow-end last;
+  font-kerning: normal;
+}
+
+/* ------------------------------------------------------------ Punches */
+
+/* The punch drops onto the metal, bites a hair too deep, then settles. */
+.strike {
+  transform-box: fill-box;
+  transform-origin: 50% 55%;
+}
+
+/* A ring of ink squeezed out from under the punch, left behind as a faint halo. */
+.ink {
+  opacity: 0;
+  transform-box: fill-box;
+  transform-origin: 50% 50%;
+}
+
+/* ------------------------------------------------------------ Plates */
+
+/* Worked metal: a flat red field with a faint sheen and grain. */
+.bar {
+  isolation: isolate;
+  overflow: clip;
+  background:
+    linear-gradient(180deg, oklch(1 0 0 / 0.05) 0%, oklch(1 0 0 / 0) 16%, oklch(0 0 0 / 0) 80%, oklch(0 0 0 / 0.12) 100%),
+    linear-gradient(100deg, var(--color-red-600) 0%, var(--color-red-500) 45%, var(--color-red-500) 100%);
+}
+
+.bar::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  opacity: 0.1;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 256px 256px;
+}
+
+/* The light a fine pointer throws on the plate. Moved with transform only. */
+.sheen {
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: 0;
+  width: 560px;
+  height: 560px;
+  margin: -280px 0 0 -280px;
+  border-radius: 50%;
+  pointer-events: none;
+  opacity: 0;
+  background: radial-gradient(closest-side, oklch(1 0 0 / 0.16), oklch(1 0 0 / 0.05) 55%, oklch(1 0 0 / 0));
+  transition: opacity 600ms cubic-bezier(0.19, 1, 0.22, 1);
+  will-change: transform;
+}
+
+.bar[data-lit="true"] .sheen {
+  opacity: 1;
+}
+
+/* ------------------------------------------------------------ Hairlines */
+
+/* A rule drawn left to right. Placed on a list item, it replaces border-top. */
+.rule {
+  position: relative;
+}
+
+.rule::before,
+.ruleEnd::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: var(--rule, color-mix(in oklab, var(--color-fg) 16%, transparent));
+  transform-origin: 0 50%;
+}
+
+.rule::before {
+  top: 0;
+}
+
+.ruleEnd {
+  position: relative;
+}
+
+.ruleEnd::after {
+  bottom: 0;
+}
+
+.onPaper {
+  --rule: color-mix(in oklab, var(--color-ink) 16%, transparent);
+}
+
+.onRed {
+  --rule: color-mix(in oklab, var(--color-fg) 28%, transparent);
+}
+
+/* The accent that sits on the start of a method stage's rule. */
+.tickMark {
+  position: absolute;
+  left: 0;
+  top: -1px;
+  width: 28px;
+  height: 3px;
+  background: var(--color-accent);
+  transform-origin: 0 50%;
+}
+
+/* A number that rolls up into its slot, like a counter clicking over. */
+.tick {
+  display: inline-flex;
+  overflow: clip;
+  vertical-align: bottom;
+  padding-block: 0.1em;
+  margin-block: -0.1em;
+}
+
+.tick > span {
+  display: inline-block;
+}
+
+/* ------------------------------------------------------------ Touchstone */
+
+/* The touchstone: a dark stone with slightly irregular edges. */
+.stone {
+  clip-path: polygon(0.4% 0.8%, 38% 0%, 71% 0.6%, 99.6% 0%, 100% 38%, 99.5% 72%, 100% 99.4%, 64% 100%, 27% 99.5%, 0% 100%, 0.5% 61%, 0% 24%);
+  background: var(--color-void);
+}
+
+/* ------------------------------------------------------------ Links */
+
+/* An arrow that leaves in its own direction and a twin that arrives behind it. */
+.arrow {
+  position: relative;
+  display: inline-flex;
+  overflow: clip;
+  flex-shrink: 0;
+}
+
+.arrow > svg {
+  transition: transform 460ms cubic-bezier(0.19, 1, 0.22, 1);
+}
+
+.arrow > svg + svg {
+  position: absolute;
+  inset: 0;
+}
+
+.arrow[data-dir="right"] > svg + svg {
+  transform: translateX(-110%);
+}
+
+.arrow[data-dir="up-right"] > svg + svg {
+  transform: translate(-110%, 110%);
+}
+
+.arrow[data-dir="down"] > svg + svg {
+  transform: translateY(-110%);
+}
+
+:is(a, button):is(:hover, :focus-visible) .arrow[data-dir="right"] > svg:first-child {
+  transform: translateX(110%);
+}
+
+:is(a, button):is(:hover, :focus-visible) .arrow[data-dir="up-right"] > svg:first-child {
+  transform: translate(110%, -110%);
+}
+
+:is(a, button):is(:hover, :focus-visible) .arrow[data-dir="down"] > svg:first-child {
+  transform: translateY(110%);
+}
+
+:is(a, button):is(:hover, :focus-visible) .arrow > svg + svg {
+  transform: none;
+}
+
+/* ------------------------------------------------------------ Questions */
+
+.qa {
+  interpolate-size: allow-keywords;
+}
+
+.qa summary {
+  -webkit-tap-highlight-color: transparent;
+}
+
+.qa summary h3 {
+  text-decoration-line: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 6px;
+  text-decoration-color: transparent;
+  transition: text-decoration-color 300ms ease;
+}
+
+.qa summary:hover h3 {
+  text-decoration-color: var(--color-accent);
+}
+
+/* A chevron cut from two bars, so it can hinge. */
+.chev {
+  position: relative;
+  display: block;
+  width: 20px;
+  height: 20px;
+  transition: transform 520ms cubic-bezier(0.34, 1.4, 0.5, 1);
+}
+
+.chev::before,
+.chev::after {
+  content: "";
+  position: absolute;
+  top: 10px;
+  width: 11px;
+  height: 2px;
+  border-radius: 1px;
+  background: var(--color-accent);
+}
+
+/* Two bars hinged 2px apart meet as one clean V. */
+.chev::before {
+  left: 0;
+  transform-origin: 100% 50%;
+  transform: rotate(42deg);
+}
+
+.chev::after {
+  left: 9px;
+  transform-origin: 0 50%;
+  transform: rotate(-42deg);
+}
+
+.qa summary:hover .chev {
+  transform: translateY(2px);
+}
+
+.qa[open] .chev {
+  transform: rotate(180deg);
+}
+
+.qa[open] summary:hover .chev {
+  transform: rotate(180deg) translateY(2px);
+}
+
+/* ------------------------------------------------------------ Address */
+
+.sort {
+  display: inline-block;
+}
+
+/* ------------------------------------------------------------ Motion */
+
+@media (scripting: enabled) and (prefers-reduced-motion: no-preference) {
+  /* Punches */
+  [data-struck="false"] .strike {
+    opacity: 0;
+    transform: scale(1.35);
+  }
+
+  [data-struck="true"] .strike {
+    animation: strike 620ms cubic-bezier(0.2, 1, 0.3, 1) both;
+    animation-delay: calc(var(--i, 0) * 240ms + var(--d, 0ms));
+  }
+
+  [data-struck="true"] .ink {
+    animation: ink 900ms cubic-bezier(0.22, 0.8, 0.3, 1) both;
+    animation-delay: calc(var(--i, 0) * 240ms + var(--d, 0ms) + 210ms);
+  }
+
+  /* Hairlines */
+  [data-seen="false"] .rule::before,
+  [data-seen="false"].ruleEnd::after,
+  [data-seen="false"] .tickMark {
+    transform: scaleX(0);
+  }
+
+  .rule::before,
+  .ruleEnd::after {
+    transition: transform 900ms cubic-bezier(0.19, 1, 0.22, 1);
+    transition-delay: calc(var(--i, 0) * 90ms + var(--d, 0ms));
+  }
+
+  .ruleEnd::after {
+    transition-delay: calc(var(--n, 0) * 90ms + var(--d, 0ms));
+  }
+
+  /* Method: the five rules join into one line drawn across the row. */
+  .stages .rule::before {
+    transition: transform 520ms cubic-bezier(0.45, 0, 0.55, 1);
+    transition-delay: calc(var(--i, 0) * 420ms);
+  }
+
+  .stages .tickMark {
+    transition: transform 360ms cubic-bezier(0.19, 1, 0.22, 1);
+    transition-delay: calc(var(--i, 0) * 420ms + 260ms);
+  }
+
+  /* Counters */
+  [data-seen="false"] .tick > span {
+    transform: translateY(105%);
+  }
+
+  .tick > span {
+    transition: transform 700ms cubic-bezier(0.19, 1, 0.22, 1);
+    transition-delay: calc(var(--i, 0) * 90ms + var(--d, 0ms) + 120ms);
+  }
+
+  .stages .tick > span {
+    transition-delay: calc(var(--i, 0) * 420ms + 320ms);
+  }
+
+  /* Soft rise for text that follows a drawn rule */
+  [data-seen="false"] .rise {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  .rise {
+    transition:
+      opacity 700ms cubic-bezier(0.19, 1, 0.22, 1),
+      transform 900ms cubic-bezier(0.19, 1, 0.22, 1);
+    transition-delay: calc(var(--i, 0) * 90ms + var(--d, 0ms) + 180ms);
+  }
+
+  .stages .rise {
+    transition-delay: calc(var(--i, 0) * 420ms + 380ms);
+  }
+
+  /* Touchstone: each streak is rubbed on, then a thinner second pass catches the light. */
+  [data-seen="false"] .streak {
+    clip-path: inset(0 100% 0 0);
+  }
+
+  .streak {
+    transition: clip-path 1100ms cubic-bezier(0.65, 0, 0.25, 1);
+    transition-delay: var(--d, 0ms);
+  }
+
+  .streak .glint {
+    transition: clip-path 900ms cubic-bezier(0.65, 0, 0.25, 1);
+    transition-delay: calc(var(--d, 0ms) + 520ms);
+  }
+
+  [data-seen="false"] .streak .glint {
+    clip-path: inset(0 100% 0 0);
+  }
+
+  /* Address: each sort drops into the composing stick. */
+  [data-seen="false"] .sort {
+    opacity: 0;
+    transform: translateY(-0.28em);
+  }
+
+  .sort {
+    transition:
+      opacity 360ms ease-out,
+      transform 520ms cubic-bezier(0.2, 1, 0.3, 1);
+    transition-delay: calc(var(--c, 0) * 16ms + 120ms);
+  }
+
+  [data-seen="false"] .setMark {
+    transform: scaleX(0);
+  }
+
+  .setMark {
+    transition: transform 700ms cubic-bezier(0.19, 1, 0.22, 1);
+    transition-delay: calc(var(--c, 0) * 16ms + 420ms);
+  }
+
+  /* Questions: the panel opens to its content's height, the answer rises into it. */
+  @supports selector(::details-content) {
+    .qa::details-content {
+      block-size: 0;
+      overflow-y: clip;
+      transition:
+        block-size 560ms cubic-bezier(0.32, 0.72, 0, 1),
+        content-visibility 560ms allow-discrete;
+    }
+
+    .qa[open]::details-content {
+      block-size: auto;
+    }
+  }
+
+  .qa[open] .answer {
+    animation: answer 560ms cubic-bezier(0.19, 1, 0.22, 1) both;
+    animation-delay: 60ms;
+  }
+}
+
+@keyframes strike {
+  0% { opacity: 0; transform: scale(1.35); }
+  38% { opacity: 1; transform: scale(0.94); }
+  66% { transform: scale(1.012); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+@keyframes ink {
+  0% { opacity: 0; transform: scale(0.98); }
+  16% { opacity: 0.55; }
+  100% { opacity: 0; transform: scale(1.12); }
+}
+
+@keyframes answer {
+  from { opacity: 0; transform: translateY(-6px); }
+  to { opacity: 1; transform: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sheen {
+    display: none;
+  }
+  .chev,
+  .arrow > svg {
+    transition: none;
+  }
+  .qa summary:hover .chev {
+    transform: none;
+  }
+  .qa[open] summary:hover .chev {
+    transform: rotate(180deg);
+  }
+}

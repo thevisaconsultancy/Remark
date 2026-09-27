@@ -8,6 +8,8 @@
   /* Light register (cream/ivory + ink) for alternating sections */
   --color-paper: oklch(0.97 0.012 42);
   --color-paper-2: oklch(0.94 0.014 40);
+  /* The warm paper the home page actually ships (Narrative, WorkPreview) */
+  --color-paper-warm: #E6DFD6;
   --color-ink: oklch(0.19 0.014 30);
   --color-ink-muted: oklch(0.4 0.012 32);
   --color-ink-subtle: oklch(0.55 0.011 35);
@@ -39,6 +41,10 @@
 
   --font-sans: var(--font-body);
   --font-mono: var(--font-mono);
+  /* Named families for non-heading elements (font-display has no theme key on purpose) */
+  --font-cranio: var(--font-display);
+  --font-ui: var(--font-manrope);
+  --font-stamp: var(--font-betha);
 
   --ease-out-expo: cubic-bezier(0.19, 1, 0.22, 1);
   --ease-out-quart: cubic-bezier(0.25, 1, 0.5, 1);

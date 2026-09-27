@@ -1,172 +1,232 @@
 "use client";
 
-import { SOCIALS, EMAIL } from "@/data/social";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { useSyncExternalStore, type ReactNode } from "react";
+import { FiArrowRight, FiArrowUp, FiArrowUpRight } from "react-icons/fi";
 import { DirectionalLiquidButton } from "./DirectionalLiquidButton";
+import { SERVICES } from "@/data/services";
+import { WEBSITES } from "@/data/projects";
+import { ADDRESS, EMAIL, MAPS_URL, PHONE_PRIMARY, PHONE_SECONDARY, SOCIALS } from "@/data/social";
+
+const NAV = [
+  { label: "Home", href: "/" },
+  { label: "Work", href: "/work" },
+  { label: "Services", href: "/services" },
+  { label: "About", href: "/about" },
+  { label: "Contact", href: "/contact" },
+] as const;
+
+/** One focus treatment for every footer control: a solid red-300 ring, clear on void. */
+const FOCUS =
+  "rounded-[2px] outline-none focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-offset-4 focus-visible:outline-red-300";
+const LINK = `font-ui text-[15px] leading-snug text-muted transition-colors duration-200 hover:text-fg ${FOCUS}`;
+/** Only sites with a live URL are linked; client name falls back to the project name. */
+const SITES = WEBSITES.flatMap((w) =>
+  w.url ? [{ slug: w.slug, url: w.url, name: w.client ?? w.name, host: new URL(w.url).hostname.replace(/^www\./, "") }] : [],
+);
+/** globals.css sets h1–h6 to the display face outside any layer, which beats utilities; labels restate mono inline. */
+const MONO = { fontFamily: "var(--font-mono), monospace" } as const;
+const LABEL = "font-mono text-[11px] font-medium uppercase tracking-[0.2em] text-subtle";
+
+/**
+ * Year for the copyright line. The server snapshot is a fixed fallback so the
+ * hydrated HTML always matches; the client's real year replaces it right after.
+ */
+const FALLBACK_YEAR = 2026;
+const noopSubscribe = () => () => {};
+function useYear() {
+  return useSyncExternalStore(
+    noopSubscribe,
+    () => new Date().getFullYear(),
+    () => FALLBACK_YEAR,
+  );
+}
+
+function Column({ id, title, children, className = "" }: { id: string; title: string; children: ReactNode; className?: string }) {
+  return (
+    <nav aria-labelledby={id} className={className}>
+      <h2 id={id} className={`${LABEL} mb-6`} style={MONO}>
+        {title}
+      </h2>
+      {children}
+    </nav>
+  );
+}
+
+function External({ href, children, className = LINK }: { href: string; children: ReactNode; className?: string }) {
+  return (
+    <a href={href} target="_blank" rel="noopener noreferrer" className={`group inline-flex items-baseline gap-1.5 ${className}`}>
+      {children}
+      <FiArrowUpRight
+        aria-hidden="true"
+        className="size-3.5 shrink-0 self-center text-subtle transition-[color,transform] duration-200 group-hover:text-red-300 motion-safe:group-hover:-translate-y-0.5 motion-safe:group-hover:translate-x-0.5"
+      />
+      <span className="sr-only"> (opens in a new tab)</span>
+    </a>
+  );
+}
 
 export function Footer() {
-  const scrollToTop = () => {
-    window.scrollTo({ top: 0, behavior: "smooth" });
+  const pathname = usePathname();
+  const year = useYear();
+  // Contact and About already close on their own "start a project" invitation.
+  const hasOwnInvite = pathname === "/contact" || pathname === "/about";
+
+  const backToTop = () => {
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    window.scrollTo({ top: 0, behavior: reduce ? "auto" : "smooth" });
+    // Return keyboard focus to the top of the document along with the view.
+    const main = document.getElementById("main-content");
+    if (main) {
+      if (!main.hasAttribute("tabindex")) main.setAttribute("tabindex", "-1");
+      main.focus({ preventScroll: true });
+    }
   };
 
   return (
-    <footer className="relative w-full bg-void text-fg overflow-hidden border-t border-white/[0.05] pt-16">
-      
-      {/* 
-        Clean & Professional Background Image Layer 
-        Using abstract material study for a high-end, clean architectural vibe
-      */}
-      <div className="absolute inset-x-0 top-0 h-[80%] opacity-20 mix-blend-screen pointer-events-none">
-        <img 
-          src="/abstract_material_study.png" 
-          alt="Professional Background"
-          className="w-full h-full object-cover object-top grayscale-[0.2]"
-        />
-        {/* Seamless fade to solid black */}
-        <div className="absolute inset-0 bg-gradient-to-b from-void/10 via-void/60 to-void" />
-        <div className="absolute inset-0 bg-gradient-to-t from-void via-void/50 to-transparent" />
-      </div>
-
-      {/* Container - Ultra Clean Grid Layout */}
-      <div className="mx-auto w-full max-w-7xl px-6 md:px-12 flex flex-col relative z-10 min-h-[700px]">
-        
-        {/* Top Header Row */}
-        <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-24 gap-8">
-          {/* Logo Badge */}
-          <a href="/" className="flex items-center gap-4 group">
-            <div className="relative flex h-14 w-14 items-center justify-center rounded-full border border-white/[0.15] bg-white/[0.02] backdrop-blur-md transition-all duration-300 group-hover:border-accent group-hover:bg-accent/10">
-              <img 
-                src="/rs logo.png" 
-                alt="Remark Studio Icon" 
-                className="h-6 w-auto object-contain transition-transform duration-300 group-hover:scale-110" 
-              />
-            </div>
-          </a>
-
-          {/* Tagline Pill */}
-          <div className="text-xs sm:text-sm font-bold tracking-[0.2em] uppercase font-[family:var(--font-mono)] border border-white/[0.08] px-6 py-3 rounded-full bg-white/[0.01] shadow-sm backdrop-blur-md">
-            <span className="text-accent">WORK </span>
-            <span className="text-white">FAST. </span>
-            <span className="text-accent">BUILD </span>
-            <span className="text-white">SLOW.</span>
-          </div>
-        </div>
-
-        {/* 4-Column Navigation Grid */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-12 lg:gap-16 w-full mb-24 border-t border-white/[0.08] pt-16">
-          
-          {/* MENU Column */}
-          <div className="flex flex-col">
-            <h3 className="font-bold text-[10px] sm:text-xs tracking-[0.25em] mb-6 uppercase font-[family:var(--font-mono)] text-white/50">
-              01 // MENU
-            </h3>
-            <ul className="space-y-4">
-              {[
-                { label: "Home", href: "/" },
-                { label: "Capabilities", href: "/#capabilities" },
-                { label: "Work", href: "/work" },
-                { label: "About Studio", href: "/about" },
-                { label: "Contact Us", href: "/contact" },
-              ].map((link) => (
-                <li key={link.label}>
-                  <a href={link.href} className="text-fg/80 hover:text-white hover:translate-x-1.5 transition-all duration-300 text-sm md:text-base font-medium inline-block font-[family:var(--font-manrope)]">
-                    {link.label}
-                  </a>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* SOLUTIONS Column */}
-          <div className="flex flex-col">
-            <h3 className="font-bold text-[10px] sm:text-xs tracking-[0.25em] mb-6 uppercase font-[family:var(--font-mono)] text-white/50">
-              02 // SOLUTIONS
-            </h3>
-            <ul className="space-y-4">
-              {["Web Development", "AI Voice Agents", "Enterprise CRM & ERP", "Brand Identity Design"].map((service) => (
-                <li key={service}>
-                  <span className="text-fg/80 cursor-default text-sm md:text-base font-medium inline-block transition-colors hover:text-white font-[family:var(--font-manrope)]">
-                    {service}
-                  </span>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* SOCIALS Column */}
-          <div className="flex flex-col">
-            <h3 className="font-bold text-[10px] sm:text-xs tracking-[0.25em] mb-6 uppercase font-[family:var(--font-mono)] text-white/50">
-              03 // SOCIALS
-            </h3>
-            <ul className="space-y-4">
-              {[...SOCIALS, { label: "Direct Email", href: `mailto:${EMAIL}` }].map((social) => (
-                <li key={social.label}>
-                  <a 
-                    href={social.href} 
-                    target={social.href.startsWith("http") ? "_blank" : undefined} 
-                    rel={social.href.startsWith("http") ? "noopener noreferrer" : undefined}
-                    className="text-fg/80 hover:text-white hover:translate-x-1.5 transition-all duration-300 text-sm md:text-base font-medium inline-block font-[family:var(--font-manrope)]"
-                  >
-                    {social.label}
-                  </a>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* INQUIRY Column */}
-          <div className="flex flex-col justify-between h-full">
-            <div>
-              <h3 className="font-bold text-[10px] sm:text-xs tracking-[0.25em] mb-6 uppercase font-[family:var(--font-mono)] text-white/50">
-                04 // INQUIRY
-              </h3>
-              <p className="text-sm text-fg/70 mb-8 leading-relaxed max-w-[200px] font-[family:var(--font-manrope)]">
-                Ready to transform your digital presence? We are available for select partnerships.
-              </p>
-            </div>
-            
-            <div className="pb-2">
-              <DirectionalLiquidButton 
-                href="/contact" 
-                className="inline-flex items-center justify-center rounded-full border border-white/20 bg-transparent px-7 py-3 text-[11px] font-bold tracking-[0.2em] text-white uppercase backdrop-blur-md transition-all duration-300 hover:border-accent hover:bg-accent/10 active:scale-95 group w-max font-[family:var(--font-mono)]"
+    <footer className="relative w-full border-t border-border-subtle bg-void text-fg">
+      <div className="mx-auto w-full max-w-7xl px-4 sm:px-6 md:px-12">
+        {/* Closing line (skipped where the page already ends on the invitation) */}
+        {!hasOwnInvite && (
+          <div className="flex flex-col gap-10 pb-16 pt-24 md:pb-20 md:pt-32 lg:flex-row lg:items-end lg:justify-between">
+            <h2 className="font-cranio max-w-[14ch] text-[clamp(2.5rem,6vw,5rem)] font-normal leading-[0.98] text-fg">
+              Have something to build?
+            </h2>
+            <div className="flex flex-col items-start gap-5 sm:flex-row sm:items-center sm:gap-8">
+              <DirectionalLiquidButton
+                href="/contact"
+                fillClassName="bg-ink"
+                className="inline-flex items-center rounded-full bg-accent px-8 py-4 font-ui text-[13px] font-semibold uppercase tracking-[0.16em] text-fg outline-none focus-visible:outline-2 focus-visible:outline-solid focus-visible:outline-offset-4 focus-visible:outline-red-300"
               >
-                <span className="relative z-10">Start a project</span>
+                <span>Start a project</span>
+                <FiArrowRight
+                  aria-hidden="true"
+                  className="size-4 transition-transform duration-500 motion-safe:group-hover:translate-x-1"
+                />
               </DirectionalLiquidButton>
+              <a
+                href={`mailto:${EMAIL}`}
+                className={`font-ui text-[17px] text-fg underline decoration-white/25 underline-offset-[6px] transition-colors duration-200 hover:decoration-red-300 ${FOCUS}`}
+              >
+                {EMAIL}
+              </a>
             </div>
           </div>
+        )}
 
+        {/* Index */}
+        <div className={`grid grid-cols-2 gap-x-6 gap-y-14 py-16 ${hasOwnInvite ? "" : "border-t border-border"} md:grid-cols-4 md:py-20 lg:grid-cols-12 lg:gap-x-8`}>
+          <Column id="footer-studio" title="Studio" className="lg:col-span-2">
+            <ul className="space-y-3.5">
+              {NAV.map((l) => (
+                <li key={l.href}>
+                  <Link href={l.href} className={LINK} aria-current={pathname === l.href ? "page" : undefined}>
+                    {l.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </Column>
+
+          <Column id="footer-services" title="Services" className="lg:col-span-3">
+            <ul className="space-y-3.5">
+              {SERVICES.map((s) => (
+                <li key={s.slug}>
+                  <Link href={`/services#${s.slug}`} className={LINK}>
+                    {s.name}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </Column>
+
+          <Column id="footer-sites" title="Live sites" className="col-span-2 md:col-span-1 lg:col-span-3">
+            <ul className="space-y-5">
+              {SITES.map((w) => (
+                <li key={w.slug}>
+                  <External href={w.url}>{w.name}</External>
+                  <p className="mt-1 font-mono text-[11px] tracking-[0.04em] text-subtle">
+                    {w.host}
+                  </p>
+                </li>
+              ))}
+            </ul>
+          </Column>
+
+          <section aria-labelledby="footer-contact" className="col-span-2 md:col-span-1 lg:col-span-4">
+            <h2 id="footer-contact" className={`${LABEL} mb-6`} style={MONO}>
+              Contact
+            </h2>
+            <ul className="space-y-3.5">
+              <li>
+                <a href={PHONE_PRIMARY.href} className={LINK}>
+                  {PHONE_PRIMARY.display}
+                </a>
+              </li>
+              <li>
+                <a href={PHONE_SECONDARY.href} className={LINK}>
+                  {PHONE_SECONDARY.display}
+                </a>
+              </li>
+            </ul>
+            <address className="mt-6 font-ui text-[15px] not-italic leading-relaxed text-muted">
+              {ADDRESS.lines.map((line) => (
+                <span key={line} className="block">
+                  {line}
+                </span>
+              ))}
+            </address>
+            <div className="mt-3">
+              <External href={MAPS_URL} className={`${LINK} text-fg`}>
+                Open in Maps
+              </External>
+            </div>
+          </section>
         </div>
 
-        {/* Massive Logo Image (Replacing the giant text) */}
-        <div className="w-full relative flex justify-center items-end select-none pointer-events-none mb-10 pt-4 px-4 sm:px-10 mt-auto">
-          {/* Subtle glow behind the logo */}
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(255,255,255,0.02)_0%,transparent_70%)] rounded-full blur-3xl pointer-events-none" />
-          
-          <img 
-            src="/rs logo.png" 
-            alt="Remark Studio" 
-            className="w-full max-w-[1000px] h-auto object-contain opacity-90 transition-transform duration-1000 hover:scale-[1.01]" 
-          />
+        {/* Wordmark */}
+        <div className="pt-8 md:pt-12">
+          <Link href="/" aria-label="Remark Studio, home" className={`block ${FOCUS}`}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/rs logo.png"
+              alt=""
+              width={11122}
+              height={2931}
+              loading="lazy"
+              decoding="async"
+              className="h-auto w-full select-none"
+            />
+          </Link>
         </div>
 
-        <div className="w-full h-px bg-gradient-to-r from-transparent via-white/[0.08] to-transparent mb-6" />
-
-        {/* Minimal Sub-Footer */}
-        <div className="flex flex-col sm:flex-row items-center justify-between text-[10px] sm:text-[11px] text-subtle font-mono tracking-widest uppercase gap-4 sm:gap-0 pb-6">
-          <p>© {new Date().getFullYear()} Remark Studio. All rights reserved.</p>
-          <div className="flex items-center gap-6">
-            <a href="/privacy" className="hover:text-white transition-colors">Privacy</a>
-            <span className="text-white/10">•</span>
-            <a href="/terms" className="hover:text-white transition-colors">Terms</a>
-            <span className="text-white/10">•</span>
-            <button 
-              onClick={scrollToTop} 
-              className="text-accent hover:text-white transition-colors flex items-center gap-2 group"
-            >
-              <span className="group-hover:-translate-y-1 transition-transform duration-300">↑</span> Top
-            </button>
-          </div>
+        {/* Base line */}
+        <div className="mt-14 flex flex-col gap-6 border-t border-border py-8 md:mt-20 md:flex-row md:items-center md:justify-between">
+          <p className="font-mono text-[11px] uppercase tracking-[0.16em] text-subtle">
+            © {year} Remark Studio · Islamabad
+          </p>
+          <nav aria-label="Social" className="md:order-none">
+            <ul className="flex flex-wrap gap-x-6 gap-y-3">
+              {SOCIALS.map((s) => (
+                <li key={s.label}>
+                  <a href={s.href} target="_blank" rel="noopener noreferrer" className={`font-ui text-[14px] text-muted transition-colors duration-200 hover:text-fg ${FOCUS}`}>
+                    {s.label}
+                    <span className="sr-only"> (opens in a new tab)</span>
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </nav>
+          <button
+            type="button"
+            onClick={backToTop}
+            className={`group inline-flex w-max items-center gap-2 font-mono text-[11px] uppercase tracking-[0.16em] text-red-300 transition-colors duration-200 hover:text-fg ${FOCUS}`}
+          >
+            <FiArrowUp aria-hidden="true" className="size-3.5 transition-transform duration-200 motion-safe:group-hover:-translate-y-0.5" />
+            Back to top
+          </button>
         </div>
-
       </div>
     </footer>
   );
