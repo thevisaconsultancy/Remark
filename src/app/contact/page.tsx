@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import { pageMetadata, breadcrumb } from "@/data/site";
+import { JsonLd } from "@/components/JsonLd";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { ContactCounter } from "@/components/contact/ContactCounter";
@@ -7,34 +9,10 @@ import type { NeedOption } from "@/components/contact/types";
 import { SERVICES } from "@/data/services";
 import { PHONE_PRIMARY } from "@/data/social";
 
-const TITLE = "Contact | Remark Studio";
 const DESCRIPTION =
   "Start a project with Remark Studio. Office #104, Mezzanine Floor, Embassy Gardens, Bahria Enclave, Islamabad. +92 326 8450001.";
-const CANONICAL = "https://remarkstudio.tech/contact";
-const OG_IMAGE = "https://remarkstudio.tech/og-image.png";
 
-// openGraph and twitter replace the layout's objects wholesale (metadata merges shallowly),
-// so a shared /contact link previews as Contact rather than as the home page.
-export const metadata: Metadata = {
-  title: TITLE,
-  description: DESCRIPTION,
-  alternates: { canonical: CANONICAL },
-  openGraph: {
-    title: TITLE,
-    description: DESCRIPTION,
-    url: CANONICAL,
-    siteName: "Remark Studio",
-    images: [{ url: OG_IMAGE, width: 1200, height: 630, alt: "Remark Studio" }],
-    locale: "en_US",
-    type: "website",
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: TITLE,
-    description: DESCRIPTION,
-    images: [OG_IMAGE],
-  },
-};
+export const metadata: Metadata = pageMetadata({ title: "Start a Project", description: DESCRIPTION, path: "/contact" });
 
 // What the form offers: every service by its form label, then a catch-all.
 const NEED_OPTIONS: NeedOption[] = [
@@ -69,6 +47,7 @@ export default async function ContactPage({
     <>
       <Header tone="paper" cta={{ label: "Call us", href: PHONE_PRIMARY.href }} />
       <main id="main-content" className="flex-1">
+        <JsonLd data={breadcrumb("Contact", "/contact")} />
         <ContactCounter key={initialNeeds.join(",")} options={NEED_OPTIONS} initialNeeds={initialNeeds} />
         <DirectLine />
       </main>

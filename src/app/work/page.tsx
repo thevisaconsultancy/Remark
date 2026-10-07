@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import { pageMetadata, breadcrumb } from "@/data/site";
+import { JsonLd } from "@/components/JsonLd";
 import { FiArrowDown } from "react-icons/fi";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
@@ -40,20 +42,7 @@ import {
 const DESCRIPTION =
   "The story of the Visa Consultancy CRM: the brief, the six modules we designed and built, how it runs the day, and the system underneath. Plus three websites.";
 
-export const metadata: Metadata = {
-  title: "Work | Remark Studio",
-  description: DESCRIPTION,
-  alternates: { canonical: "https://remarkstudio.tech/work" },
-  openGraph: {
-    title: "Work | Remark Studio",
-    description: DESCRIPTION,
-    url: "https://remarkstudio.tech/work",
-    siteName: "Remark Studio",
-    images: [{ url: "https://remarkstudio.tech/og-image.png", width: 1200, height: 630, alt: "Remark Studio" }],
-    locale: "en_US",
-    type: "website",
-  },
-};
+export const metadata: Metadata = pageMetadata({ title: "Work: Visa Consultancy CRM Case Study", description: DESCRIPTION, path: "/work" });
 
 /** Small uppercase mono label, used for list heads inside chapters. */
 const LIST_HEAD = "font-mono text-[12px] uppercase tracking-[0.2em]";
@@ -73,6 +62,7 @@ export default function WorkPage() {
     <>
       <Header />
       <main id="main-content" className="flex-1 font-ui">
+        <JsonLd data={breadcrumb("Work", "/work")} />
         {/* ------------------------------------------------------------ */}
         {/* Opening: the product, named and shown                         */}
         {/* ------------------------------------------------------------ */}

@@ -62,7 +62,7 @@ export function Header({ tone = "void", cta }: HeaderProps = {}) {
           {/* Left: Logo */}
           <div className="flex flex-1 justify-start">
             <Link href="/" className="flex items-center gap-2 group z-10">
-              <img src={onPaper && !menuOpen ? "/rs-logo-ink.png" : "/rs logo.png"} alt="Remark Studio" className={`w-auto transition-all duration-500 ease-out-expo group-hover:scale-[1.02] ${scrolled ? "h-6 md:h-7" : "h-8 md:h-9"}`} />
+              <img src={onPaper && !menuOpen ? "/rs-logo-ink.png" : "/rs-logo.png"} alt="Remark Studio" className={`w-auto transition-all duration-500 ease-out-expo group-hover:scale-[1.02] ${scrolled ? "h-6 md:h-7" : "h-8 md:h-9"}`} />
             </Link>
           </div>
           

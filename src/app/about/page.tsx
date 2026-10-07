@@ -1,4 +1,7 @@
 import type { Metadata } from "next";
+import { pageMetadata, breadcrumb } from "@/data/site";
+import { JsonLd } from "@/components/JsonLd";
+import { QUESTIONS } from "@/data/about";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { HallmarkHero } from "@/components/about/HallmarkHero";
@@ -10,31 +13,16 @@ import { Questions } from "@/components/about/Questions";
 import { OfficeMark } from "@/components/about/OfficeMark";
 import styles from "@/components/about/about.module.css";
 
-const TITLE = "About | Remark Studio";
 const DESCRIPTION =
   "Remark Studio is a design studio in Islamabad that happens to code: websites, AI voice agents, chatbots, CRM and ERP systems, marketing, brand identity and creative production.";
-const CANONICAL = "https://remarkstudio.tech/about";
-const OG_IMAGE = "https://remarkstudio.tech/og-image.png";
 
-export const metadata: Metadata = {
-  title: TITLE,
-  description: DESCRIPTION,
-  alternates: { canonical: CANONICAL },
-  openGraph: {
-    title: TITLE,
-    description: DESCRIPTION,
-    url: CANONICAL,
-    siteName: "Remark Studio",
-    images: [{ url: OG_IMAGE, width: 1200, height: 630, alt: "Remark Studio" }],
-    locale: "en_US",
-    type: "website",
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: TITLE,
-    description: DESCRIPTION,
-    images: [OG_IMAGE],
-  },
+export const metadata: Metadata = pageMetadata({ title: "About the Studio", description: DESCRIPTION, path: "/about" });
+
+// Mirrors the visible Questions section word for word.
+const FAQ_JSON_LD = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  mainEntity: QUESTIONS.map(({ q, a }) => ({ "@type": "Question", name: q, acceptedAnswer: { "@type": "Answer", text: a } })),
 };
 
 /**
@@ -50,6 +38,8 @@ export default function AboutPage() {
     <>
       <Header tone="paper" />
       <main id="main-content" className={`${styles.page} flex-1 font-ui`}>
+        <JsonLd data={breadcrumb("About", "/about")} />
+        <JsonLd data={FAQ_JSON_LD} />
         <HallmarkHero />
         <MakerSection />
         <Touchstone />

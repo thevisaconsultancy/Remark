@@ -190,10 +190,10 @@ export function Footer() {
           <Link href="/" aria-label="Remark Studio, home" className={`block ${FOCUS}`}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src="/rs logo.png"
+              src="/rs-logo.png"
               alt=""
-              width={11122}
-              height={2931}
+              width={2400}
+              height={632}
               loading="lazy"
               decoding="async"
               className="h-auto w-full select-none"

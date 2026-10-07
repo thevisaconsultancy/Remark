@@ -113,7 +113,7 @@ export function Hero() {
     <section className="relative flex h-[100dvh] w-full flex-col justify-end overflow-hidden bg-void text-left">
       <img
         src="/Image Quality Improvement 2K Jul 06.jpeg"
-        alt="Hero Image"
+        alt=""
         className="absolute inset-0 h-full w-full object-cover object-[60%_50%]"
         fetchPriority="high"
       />
@@ -124,7 +124,7 @@ export function Hero() {
       <div className="relative z-10 mx-auto w-full max-w-7xl px-6 pb-24 pt-32 md:px-8 md:pb-32 lg:pb-40">
         
         {/* Screen Reader Only Heading */}
-        <h1 className="sr-only">Creative Intelligence</h1>
+        <h1 className="sr-only">Remark Studio: web development, AI agents and CRM systems, Islamabad</h1>
         
         {/* Container for Hover Interaction */}
         <div 

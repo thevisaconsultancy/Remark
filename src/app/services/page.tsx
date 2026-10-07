@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import { pageMetadata, breadcrumb } from "@/data/site";
+import { JsonLd } from "@/components/JsonLd";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { ServicesHero } from "@/components/services/ServicesHero";
@@ -9,20 +11,7 @@ import { StartSection } from "@/components/services/StartSection";
 const DESCRIPTION =
   "Web development, AI voice agents, chatbots, CRM and ERP systems, brand identity, digital marketing and creative production from Remark Studio, Islamabad.";
 
-export const metadata: Metadata = {
-  title: "Services | Remark Studio",
-  description: DESCRIPTION,
-  alternates: { canonical: "https://remarkstudio.tech/services" },
-  openGraph: {
-    title: "Services | Remark Studio",
-    description: DESCRIPTION,
-    url: "https://remarkstudio.tech/services",
-    siteName: "Remark Studio",
-    images: [{ url: "https://remarkstudio.tech/og-image.png", width: 1200, height: 630, alt: "Remark Studio" }],
-    locale: "en_US",
-    type: "website",
-  },
-};
+export const metadata: Metadata = pageMetadata({ title: "Services: Web, AI Agents, CRM & Branding", description: DESCRIPTION, path: "/services" });
 
 /**
  * Services: a product catalogue. Each service is shown as the thing the client
@@ -35,6 +24,7 @@ export default function ServicesPage() {
     <>
       <Header />
       <main id="main-content" className="flex-1">
+        <JsonLd data={breadcrumb("Services", "/services")} />
         <ServicesHero />
         <Catalogue />
         <FiveHeats />
